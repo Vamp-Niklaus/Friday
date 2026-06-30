@@ -63,7 +63,7 @@ export default function App() {
             })}
           </nav>
           
-          <div style={{ marginTop: 'auto', paddingTop: '24px' }}>
+          <div className="sign-out-container" style={{ marginTop: 'auto', paddingTop: '24px' }}>
              <button 
                 onClick={() => supabase.auth.signOut()} 
                 className="nav-button" 

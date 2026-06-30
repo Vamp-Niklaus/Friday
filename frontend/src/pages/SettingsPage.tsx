@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Check, Loader2, Send } from "lucide-react";
 import { api } from "../services/api";
+import { supabase } from "../services/supabase";
 
 type UserSettings = {
   display_name: string | null;
@@ -233,6 +234,17 @@ export function SettingsPage() {
             )}
           </div>
         )}
+      </section>
+      
+      <section className="task-group" style={{ marginTop: '24px' }}>
+        <h3 className="task-group-date" style={{ color: '#a83232' }}>Danger Zone</h3>
+        <button 
+          onClick={() => supabase.auth.signOut()} 
+          className="btn-modern" 
+          style={{ background: '#fce8e8', color: '#a83232', border: '1px solid #f5c6c6', width: '100%' }}
+        >
+          Sign Out of Friday
+        </button>
       </section>
 
       <footer style={{ marginTop: "32px", textAlign: "center", fontSize: "0.85em", color: "#7a7468" }}>
