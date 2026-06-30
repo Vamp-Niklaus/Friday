@@ -67,19 +67,19 @@ class TelegramService:
         lines = []
 
         if immediate:
-            lines.append("🚨 IMMEDIATE:")
+            lines.append("IMMEDIATE:")
             for t in immediate:
                 lines.append(f"- [{format_time(t['todo_at'])}] {t['title']}")
             lines.append("")
 
         if past_due:
-            lines.append("⚠️ PAST DUE:")
+            lines.append("PAST DUE:")
             for t in past_due:
                 lines.append(f"- [{format_time(t['todo_at'])}] {t['title']}")
             lines.append("")
 
         if problems:
-            lines.append("🧠 TODAY'S PROBLEMS:")
+            lines.append("TODAY'S PROBLEMS:")
             for t in problems:
                 lines.append(f"- {t['title']}")
             lines.append("")

@@ -1,4 +1,4 @@
-import { Check, Pencil, X, AlertCircle } from "lucide-react";
+import { Check, Pencil, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -91,9 +91,9 @@ export function TodosPage() {
         const isPastDue = new Date(group.date).getTime() < Date.now();
         return (
         <section className="task-group" key={group.date}>
-          <h3 className="task-group-date" style={{ color: isPastDue ? '#ef4444' : 'inherit' }}>
+          <h3 className="task-group-date">
             {formatDate(group.date)}
-            {isPastDue && <span style={{ marginLeft: '8px', fontSize: '0.85em', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertCircle size={14} /> Past Due</span>}
+            {isPastDue && <span style={{ marginLeft: '8px', fontSize: '0.85em', fontWeight: 'normal', color: 'var(--text-muted, #888)' }}>(Past due)</span>}
           </h3>
           <ul className="task-list">
             {group.tasks.map((task) => (
