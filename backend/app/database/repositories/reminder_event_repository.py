@@ -52,7 +52,7 @@ class ReminderEventRepository:
         """Log a successfully sent reminder."""
         result = (
             self.client.table("reminder_events")
-            .insert(
+            .upsert(
                 {
                     "user_id": user_id,
                     "task_id": task_id,
@@ -61,7 +61,8 @@ class ReminderEventRepository:
                     "channel": "telegram",
                     "status": "sent",
                     "message": message,
-                }
+                },
+                on_conflict="task_id,scheduled_for,channel"
             )
             .execute()
         )
@@ -71,7 +72,7 @@ class ReminderEventRepository:
         """Log a failed reminder attempt."""
         result = (
             self.client.table("reminder_events")
-            .insert(
+            .upsert(
                 {
                     "user_id": user_id,
                     "task_id": task_id,
@@ -79,7 +80,8 @@ class ReminderEventRepository:
                     "channel": "telegram",
                     "status": "failed",
                     "error": error,
-                }
+                },
+                on_conflict="task_id,scheduled_for,channel"
             )
             .execute()
         )
