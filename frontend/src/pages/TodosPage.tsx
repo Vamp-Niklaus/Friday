@@ -1,4 +1,4 @@
-import { Check, Pencil, X } from "lucide-react";
+import { Check, Pencil, X, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -87,9 +87,14 @@ export function TodosPage() {
         <p className="muted">No open todos. Create one from the Chat page.</p>
       )}
 
-      {groups.map((group) => (
+      {groups.map((group) => {
+        const isPastDue = new Date(group.date).getTime() < Date.now();
+        return (
         <section className="task-group" key={group.date}>
-          <h3 className="task-group-date">{formatDate(group.date)}</h3>
+          <h3 className="task-group-date" style={{ color: isPastDue ? '#ef4444' : 'inherit' }}>
+            {formatDate(group.date)}
+            {isPastDue && <span style={{ marginLeft: '8px', fontSize: '0.85em', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertCircle size={14} /> Past Due</span>}
+          </h3>
           <ul className="task-list">
             {group.tasks.map((task) => (
               <li className="task-item" key={task.id}>
@@ -137,7 +142,8 @@ export function TodosPage() {
             ))}
           </ul>
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }
