@@ -106,10 +106,10 @@ async def create_chat_message(
 
         if action not in ("create_task", "create_problem", "update_task"):
             msg_lower = payload.message.lower()
-            if any(greet in msg_lower for greet in ["hi", "hello", "hey", "morning", "evening"]):
-                reply = "Hi there! What can I schedule or track for you today?"
+            if any(greet in msg_lower for greet in ["hi", "hello", "hey", "morning", "evening", "how are you", "who are you", "your name", "what are you"]):
+                reply = "I am Friday, your personal assistant! How can I help you? Tell me 'remind me to...' to add a todo task, or ask me to 'loop this' to set a revision task."
             else:
-                reply = "I saved your message! Tell me with 'remind me' when you want a todo created, or ask me to track a problem."
+                reply = "I saved your message! Tell me with 'remind me to...' to add a todo task, or ask me to track a problem in a loop."
             chat_repository.create("assistant", reply, user_id, {"extraction": extraction})
             return ChatResponse(message=reply)
 
