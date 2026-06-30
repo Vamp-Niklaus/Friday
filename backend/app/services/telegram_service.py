@@ -1,3 +1,4 @@
+import asyncio
 import httpx
 from datetime import datetime, timedelta
 
@@ -20,17 +21,24 @@ class TelegramService:
         if not target_chat_id:
             raise ValueError("Missing Telegram Chat ID. Pass one as an argument or set TELEGRAM_CHAT_ID in .env")
 
-        async with httpx.AsyncClient(timeout=20) as client:
-            response = await client.post(
-                f"{self.base_url}/bot{self.bot_token}/sendMessage",
-                json={
-                    "chat_id": target_chat_id,
-                    "text": text,
-                    "disable_web_page_preview": True,
-                },
-            )
-            response.raise_for_status()
-            return response.json()
+        async with httpx.AsyncClient(timeout=30) as client:
+            for attempt in range(3):
+                try:
+                    response = await client.post(
+                        f"{self.base_url}/bot{self.bot_token}/sendMessage",
+                        json={
+                            "chat_id": target_chat_id,
+                            "text": text,
+                            "disable_web_page_preview": True,
+                        },
+                    )
+                    response.raise_for_status()
+                    return response.json()
+                except httpx.RequestError as exc:
+                    if attempt == 2:
+                        raise
+                    print(f"Telegram network error: {exc}. Retrying...")
+                    await asyncio.sleep(2)
 
     async def send_task_reminder(self, task: dict, chat_id: str = None) -> dict:
         return await self.send_message(self.build_task_reminder_message(task), chat_id=chat_id)
