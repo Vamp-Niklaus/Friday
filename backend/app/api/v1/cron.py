@@ -3,7 +3,7 @@ from app.services.reminders import run_reminder_cycle
 
 router = APIRouter()
 
-@router.get("/reminders")
+@router.api_route("/reminders", methods=["GET", "HEAD"])
 async def trigger_reminders():
     """
     Public stateless endpoint to trigger the reminder cycle.
