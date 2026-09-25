@@ -63,14 +63,21 @@ class GeminiProvider:
         if not self.api_key:
             raise ValueError(f"Missing API key for LLM provider: {self.provider}")
 
-        configs_to_try = [
-            {
-                "provider": "gemini_native",
-                "base_url": self.base_url,
-                "api_key": self.api_key,
-                "model": self.model,
-            }
-        ]
+        configs_to_try = []
+        if getattr(settings, "groq_api_key", None):
+            configs_to_try.append({
+                "provider": "groq",
+                "base_url": "https://api.groq.com/openai/v1",
+                "api_key": settings.groq_api_key,
+                "model": "openai/gpt-oss-120b",
+            })
+
+        configs_to_try.append({
+            "provider": "gemini_native",
+            "base_url": self.base_url,
+            "api_key": self.api_key,
+            "model": self.model,
+        })
 
         # OpenRouter Fallback
         if getattr(settings, "openrouter_api_key", None):
@@ -84,7 +91,9 @@ class GeminiProvider:
         last_exc = None
         async with httpx.AsyncClient(timeout=30) as client:
             for config in configs_to_try:
-                logger.info(f"[LLM Provider] Trying model: {config['model']} via {config['provider']}")
+                logger.info("*" * 50)
+                logger.info(f"[LLM Provider] HIT: {config['model']} via {config['provider']}")
+                logger.info("*" * 50)
                 
                 if config["provider"] == "gemini_native":
                     # Native Gemini Format
@@ -118,7 +127,9 @@ class GeminiProvider:
                     try:
                         response = await client.post(url, headers=headers, json=payload)
                         response.raise_for_status()
-                        logger.info(f"[LLM Provider] Success with {config['model']} (Native)!")
+                        logger.info("*" * 50)
+                        logger.info(f"[LLM Provider] SUCCESS: {config['model']} via {config['provider']} (Native)")
+                        logger.info("*" * 50)
                         
                         data = response.json()
                         if "candidates" not in data or not data["candidates"]:
@@ -129,7 +140,9 @@ class GeminiProvider:
                     except httpx.HTTPStatusError as exc:
                         last_exc = exc
                         if exc.response.status_code in (429, 502, 503, 400, 404, 402):
-                            logger.warning(f"[LLM Provider] {config['model']} failed with {exc.response.status_code}. Falling back to next configuration...")
+                            logger.info("*" * 50)
+                            logger.warning(f"[LLM Provider] FAIL: {config['model']} via {config['provider']} (Status: {exc.response.status_code}). Falling back...")
+                            logger.info("*" * 50)
                             continue
                         raise
 
@@ -137,7 +150,7 @@ class GeminiProvider:
                     # OpenAI / OpenRouter Format
                     payload = {
                         "messages": messages,
-                        "temperature": 0.1,
+                        "temperature": 0 if config["provider"] == "groq" else 0.1,
                         "model": config["model"],
                     }
 
@@ -156,7 +169,9 @@ class GeminiProvider:
                             json=payload,
                         )
                         response.raise_for_status()
-                        logger.info(f"[LLM Provider] Success with {config['model']} (OpenRouter)!")
+                        logger.info("*" * 50)
+                        logger.info(f"[LLM Provider] SUCCESS: {config['model']} via {config['provider']}")
+                        logger.info("*" * 50)
                         
                         data = response.json()
                         if "choices" not in data or not data["choices"]:
@@ -167,7 +182,9 @@ class GeminiProvider:
                     except httpx.HTTPStatusError as exc:
                         last_exc = exc
                         if exc.response.status_code in (429, 502, 503, 400, 404, 402):
-                            logger.warning(f"[LLM Provider] {config['model']} failed with {exc.response.status_code}. Falling back to next configuration...")
+                            logger.info("*" * 50)
+                            logger.warning(f"[LLM Provider] FAIL: {config['model']} via {config['provider']} (Status: {exc.response.status_code}). Falling back...")
+                            logger.info("*" * 50)
                             continue
                         raise
 

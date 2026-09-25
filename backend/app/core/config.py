@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4.1-mini"
     openrouter_api_key: str = ""
     openrouter_model: str = ""
+    groq_api_key: str = ""
 
     supabase_url: str = ""
     supabase_service_role_key: str = ""
