@@ -65,9 +65,9 @@ async def create_chat_message(
     user_message = chat_repository.create("user", payload.message, user_id)
     chat_history = chat_repository.list_recent(user_id)
     
-    # Truncate history to last 4 messages (2 interactions) to drastically save LLM tokens and latency
-    if chat_history and len(chat_history) > 4:
-        chat_history = chat_history[-4:]
+    # Truncate history to last 10 messages (5 interactions) to keep context while saving tokens
+    if chat_history and len(chat_history) > 10:
+        chat_history = chat_history[-10:]
         
     omni_agent = OmniAgent(llm_provider)
 
@@ -105,11 +105,9 @@ async def create_chat_message(
         action = extraction.get("action")
 
         if action not in ("create_task", "create_problem", "update_task"):
-            msg_lower = payload.message.lower()
-            if any(greet in msg_lower for greet in ["hi", "hello", "hey", "morning", "evening", "how are you", "who are you", "your name", "what are you"]):
-                reply = "I am Friday, your personal assistant! How can I help you? Tell me 'remind me to...' to add a todo task, or ask me to 'loop this' to set a revision task."
-            else:
-                reply = "I saved your message! Tell me with 'remind me to...' to add a todo task, or ask me to track a problem in a loop."
+            reply = extraction.get("conversational_reply")
+            if not reply:
+                reply = "I'm not quite sure about that! Try asking me to 'remind me to...' or 'schedule this problem'."
             chat_repository.create("assistant", reply, user_id, {"extraction": extraction})
             return ChatResponse(message=reply)
 
